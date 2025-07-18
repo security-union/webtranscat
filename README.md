@@ -40,36 +40,36 @@ cargo install --path .
 
 ```bash
 # Connect to a WebTransport server (interactive mode)
-webtranscat wss://example.com:4443
+webtranscat https://example.com:4443
 
 # Connect with verbose logging
-webtranscat -v wss://example.com:4443
+webtranscat -v https://example.com:4443
 
 # Connect with insecure certificate verification (for testing)
-webtranscat --insecure wss://localhost:4443
+webtranscat --insecure https://localhost:4443
 
 # Listen-only mode (don't send stdin input)
-webtranscat -u wss://example.com:4443
+webtranscat -u https://example.com:4443
 
 # Exit after receiving one message
-webtranscat -1 wss://example.com:4443
+webtranscat -1 https://example.com:4443
 
 # Multiple verbosity levels (like websocat)
-webtranscat -vv wss://example.com:4443   # Debug level
-webtranscat -vvv wss://example.com:4443  # Trace level
+webtranscat -vv https://example.com:4443   # Debug level
+webtranscat -vvv https://example.com:4443  # Trace level
 
 # Quiet mode (suppress diagnostic messages)
-webtranscat -q wss://example.com:4443
+webtranscat -q https://example.com:4443
 ```
 
 ### Environment Variables
 
 ```bash
 # Override logging with RUST_LOG
-RUST_LOG=debug webtranscat wss://example.com:4443
+RUST_LOG=debug webtranscat https://example.com:4443
 
 # Early startup debugging
-WEBTRANSCAT_EARLY_LOG=1 webtranscat wss://example.com:4443
+WEBTRANSCAT_EARLY_LOG=1 webtranscat https://example.com:4443
 ```
 
 ## Command Line Options

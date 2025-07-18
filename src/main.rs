@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use bytes::Bytes;
 use clap::Parser;
 use log::{debug, error, info, warn};
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
 use url::Url;
-use web_transport_quinn::{Client, ClientBuilder, Session};
+use web_transport_quinn::{Client, ClientBuilder};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -18,9 +16,17 @@ struct Args {
     /// WebTransport URL to connect to
     url: Url,
 
-    /// Verbose output
-    #[arg(short, long)]
-    verbose: bool,
+    /// Increase verbosity level to info or further
+    #[arg(
+        short = 'v',
+        action = clap::ArgAction::Count,
+        help = "Increase verbosity level to info or further"
+    )]
+    verbosity: u8,
+
+    /// Suppress all diagnostic messages, except of startup errors
+    #[arg(short = 'q', help = "Suppress all diagnostic messages, except of startup errors")]
+    quiet: bool,
 
     /// Skip certificate verification (insecure)
     #[arg(long)]
@@ -35,27 +41,65 @@ struct Args {
     one_message: bool,
 }
 
+// Based on websocat's logging approach
+mod logging {
+    use anyhow::Result;
+    use log::Level;
+
+    pub fn setup_env_logger(ll: u8) -> Result<()> {
+        if std::env::var("RUST_LOG").is_ok() {
+            if ll > 0 {
+                eprintln!("webtranscat: RUST_LOG environment variable overrides any -v");
+            }
+            env_logger::init();
+            return Ok(());
+        }
+
+        let lf = match ll {
+            0 => Level::Warn,        // Default: warnings and errors only
+            1 => Level::Info,        // -v: info, warnings, errors  
+            2 => Level::Debug,       // -vv: debug, info, warnings, errors
+            _ => Level::Trace,       // -vvv+: trace (everything)
+        }
+        .to_level_filter();
+
+        env_logger::Builder::new()
+            .filter(Some("webtranscat"), lf)
+            .filter(None, Level::Warn.to_level_filter())
+            .try_init()?;
+        Ok(())
+    }
+}
+
 async fn create_client(args: &Args) -> Result<Client> {
     if args.insecure {
         warn!("Certificate verification disabled (--insecure)");
         // SAFETY: This is intentionally insecure for testing purposes
         Ok(unsafe { ClientBuilder::new().with_no_certificate_verification()? })
     } else {
-        // Use default secure configuration - let's try the basic new() method
+        // Use default secure configuration with system certificates
         Ok(ClientBuilder::new().with_system_roots()?)
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Handle early logging like websocat
+    let mut logging_already_set = false;
+    if std::env::var("WEBTRANSCAT_EARLY_LOG").is_ok() {
+        logging::setup_env_logger(0)?;
+        logging_already_set = true;
+    }
+
     let args = Args::parse();
+    let quiet = args.quiet;
 
-    // Enable logging
-    let env =
-        env_logger::Env::default().default_filter_or(if args.verbose { "debug" } else { "info" });
-    env_logger::init_from_env(env);
+    // Setup logging (if not already done and not in quiet mode)
+    if !quiet && !logging_already_set {
+        logging::setup_env_logger(args.verbosity)?;
+    }
 
-    if args.verbose {
+    if args.verbosity > 0 {
         info!("webtranscat starting");
         debug!("Arguments: {:?}", args);
     }
@@ -72,7 +116,7 @@ async fn main() -> Result<()> {
     // Handle datagrams
     {
         let session = session.clone();
-        let verbose = args.verbose;
+        let verbose = args.verbosity > 0;
         let one_message = args.one_message;
 
         handles.push(tokio::spawn(async move {
@@ -102,7 +146,7 @@ async fn main() -> Result<()> {
     // Handle unidirectional streams
     {
         let session = session.clone();
-        let verbose = args.verbose;
+        let verbose = args.verbosity > 0;
         let one_message = args.one_message;
 
         handles.push(tokio::spawn(async move {
@@ -143,7 +187,7 @@ async fn main() -> Result<()> {
     // Handle stdin input (if not unidirectional)
     if !args.unidirectional {
         let session = session.clone();
-        let verbose = args.verbose;
+        let verbose = args.verbosity > 0;
 
         handles.push(tokio::spawn(async move {
             let stdin = io::stdin();

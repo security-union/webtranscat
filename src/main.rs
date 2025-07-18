@@ -104,7 +104,7 @@ async fn main() -> Result<()> {
 
     if args.verbosity > 0 {
         info!("webtranscat starting");
-        debug!("Arguments: {:?}", args);
+        debug!("Arguments: {args:?}");
     }
 
     // Create client and connect
@@ -138,7 +138,7 @@ async fn main() -> Result<()> {
                         }
                     }
                     Err(e) => {
-                        error!("Datagram error: {}", e);
+                        error!("Datagram error: {e}");
                         break;
                     }
                 }
@@ -174,12 +174,12 @@ async fn main() -> Result<()> {
                                 }
                             }
                             Err(e) => {
-                                error!("Stream read error: {}", e);
+                                error!("Stream read error: {e}");
                             }
                         }
                     }
                     Err(e) => {
-                        error!("Stream accept error: {}", e);
+                        error!("Stream accept error: {e}");
                         break;
                     }
                 }
@@ -214,13 +214,13 @@ async fn main() -> Result<()> {
                         }
 
                         if let Err(e) = session.send_datagram(Bytes::from(data.to_vec())) {
-                            error!("Failed to send datagram: {}", e);
+                            error!("Failed to send datagram: {e}");
                         } else if verbose {
                             debug!("Datagram sent successfully");
                         }
                     }
                     Err(e) => {
-                        error!("Error reading from stdin: {}", e);
+                        error!("Error reading from stdin: {e}");
                         break;
                     }
                 }

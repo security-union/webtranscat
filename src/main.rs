@@ -25,7 +25,10 @@ struct Args {
     verbosity: u8,
 
     /// Suppress all diagnostic messages, except of startup errors
-    #[arg(short = 'q', help = "Suppress all diagnostic messages, except of startup errors")]
+    #[arg(
+        short = 'q',
+        help = "Suppress all diagnostic messages, except of startup errors"
+    )]
     quiet: bool,
 
     /// Skip certificate verification (insecure)
@@ -56,10 +59,10 @@ mod logging {
         }
 
         let lf = match ll {
-            0 => Level::Warn,        // Default: warnings and errors only
-            1 => Level::Info,        // -v: info, warnings, errors  
-            2 => Level::Debug,       // -vv: debug, info, warnings, errors
-            _ => Level::Trace,       // -vvv+: trace (everything)
+            0 => Level::Warn,  // Default: warnings and errors only
+            1 => Level::Info,  // -v: info, warnings, errors
+            2 => Level::Debug, // -vv: debug, info, warnings, errors
+            _ => Level::Trace, // -vvv+: trace (everything)
         }
         .to_level_filter();
 

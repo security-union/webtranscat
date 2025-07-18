@@ -2,9 +2,21 @@
 name = "webtranscat"
 version = "0.1.0"
 edition = "2021"
-description = "WebTransport equivalent of websocat - a command-line WebTransport client"
-authors = ["webtranscat contributors"]
+description = "WebTransport equivalent of websocat - a command-line WebTransport client for debugging and testing"
+authors = ["dario@securityunion.dev"]
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/securityunion/webtranscat"
+homepage = "https://github.com/securityunion/webtranscat"
+documentation = "https://docs.rs/webtranscat"
+readme = "README.md"
+keywords = ["webtransport", "quic", "debugging", "networking", "client"]
+categories = ["command-line-utilities", "network-programming", "development-tools"]
+exclude = [
+    "/.github/*",
+    "/docs/*",
+    "*.log",
+    "*.tmp"
+]
 
 [dependencies]
 web-transport-quinn = "0.7.2"

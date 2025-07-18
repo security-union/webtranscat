@@ -1,0 +1,23 @@
+[package]
+name = "webtranscat"
+version = "0.1.0"
+edition = "2021"
+description = "WebTransport equivalent of websocat - a command-line WebTransport client"
+authors = ["webtranscat contributors"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+web-transport-quinn = "0.7.2"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+url = "2"
+futures = "0.3"
+bytes = "1"
+log = "0.4"
+env_logger = "0.11"
+anyhow = "1"
+rustls = { version = "0.23", default-features = false, features = ["logging", "std", "aws-lc-rs"] }
+quinn = "0.11"
+rustls-native-certs = "0.8"
+http = "1"
+aws-lc-rs = "1"

@@ -1699,7 +1699,7 @@ dependencies = [
 
 [[package]]
 name = "webtranscat"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "aws-lc-rs",
